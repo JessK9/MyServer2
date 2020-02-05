@@ -13,16 +13,14 @@ namespace MyServer
     {
         static void Main(string[] args)
         {
-          
-        }
-        public void runServer()
-        {
             TcpListener listener;
             Socket connection;
             NetworkStream socketStream;
-            try{
-                listener = new TcpListener(43);
-                while(true)
+            IPAddress localAddr = IPAddress.Parse("127.0.0.1"); //Got from micrsoft site
+            try
+            {
+                listener = new TcpListener(localAddr, 43);
+                while (true)
                 {
                     connection = listener.AcceptSocket();
                     socketStream = new NetworkStream(connection);
@@ -31,10 +29,11 @@ namespace MyServer
                     connection.Close();
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 log.log(e.ToString());
             }
         }
+        
     }
 }

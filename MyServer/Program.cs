@@ -24,6 +24,7 @@ namespace MyServer
             try
             {
                 listener = new TcpListener(IPAddress.Any,43);  //deprecated means its old fashioned but still works
+                listener.Start();
                 while (true)
                 {
                     connection = listener.AcceptSocket();

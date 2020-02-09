@@ -13,13 +13,17 @@ namespace MyServer
     {
         static void Main(string[] args)
         {
+            runServer();
+        }
+        static void runServer()
+        {
             TcpListener listener;
             Socket connection;
             NetworkStream socketStream;
-            IPAddress localAddr = IPAddress.Parse("127.0.0.1"); //Got from micrsoft site
+
             try
             {
-                listener = new TcpListener(localAddr, 43);
+                listener = new TcpListener(IPAddress.Any,43);  //deprecated means its old fashioned but still works
                 while (true)
                 {
                     connection = listener.AcceptSocket();
@@ -31,9 +35,30 @@ namespace MyServer
             }
             catch (Exception e)
             {
-                log.log(e.ToString());
+                Console.WriteLine("Exception: " + e.ToString());
             }
         }
-        
+
+
+        static void doRequest(NetworkStream socketStream)
+        {
+
+            try
+            {
+                StreamWriter sw = new StreamWriter(socketStream);
+                StreamReader sr = new StreamReader(socketStream);
+
+
+                //  sw.WriteLine(args[0]);
+                //    sw.Flush(); 
+                    Console.WriteLine(sr.ReadToEnd());
+            }
+
+            catch
+            {
+                Console.WriteLine("Something went wrong");
+            }
+         }       
     }
 }
+

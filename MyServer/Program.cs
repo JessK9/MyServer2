@@ -88,6 +88,24 @@ namespace MyServer
                     sw.Flush();
                    
                 }
+                string protocol = "whois";
+
+                switch (protocol)
+                {
+                    case "whois": //whois protocol
+                        {
+                            
+                        }
+                    case "POST": //HTTP 1.1
+                        {
+
+                        }
+                    case "PUT": // HTTP 0.9
+                        {
+
+                        }
+                    case "GET":  // HTTP 0.9
+                }
                 
 
             }

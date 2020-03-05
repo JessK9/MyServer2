@@ -71,13 +71,10 @@ namespace MyServer
                 {
                     if (split[0] == "GET")
                     {
-                        name = split[4];
+                        name = split[1].Substring(2);
                         if (dictionary.ContainsKey(name))
                         {
-                            sw.WriteLine("HTTP/1.0 200 OK");
-                            sw.WriteLine("Content-Type: text/plain");
-                            sw.WriteLine();
-                            sw.WriteLine(dictionary[name]);  
+                            sw.WriteLine("HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\n\r\nis being tested\r\n");
                             sw.Flush();
                         }
                         else if(!dictionary.ContainsKey(name))
@@ -88,18 +85,15 @@ namespace MyServer
                     }
                     else if (split[0] == "POST")
                     {
-                        name = split[3];             // unlike the GET, there is no ? before the name
+                        name = split[1].Substring(1);            
                         do
                         {
                             line = sr.ReadLine();
-                        } while (line.Length != 0);
+                        } while (line.Length != 0);         // want the very last line, atm is producing the optional header lines
 
-                        location = sr.ReadToEnd();
-                        dictionary[name] = location;
+                        dictionary[name] = line;
 
-                        sw.WriteLine("HTTP/1.0 200 OK");
-                        sw.WriteLine("Content-Type: text/plain");
-                        sw.WriteLine();
+                        sw.WriteLine("HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\n\r\n");
                         sw.Flush();
                     }
 
@@ -108,20 +102,15 @@ namespace MyServer
                 {
                     if (split[0] == "GET")
                     {
-                        name = split[6];   // ideally, would not have to use split but would be pre assigned
+                        name = split[1].Substring(7);    
                         if (dictionary.ContainsKey(name))
                         {
-                            sw.WriteLine("HTTP/1.1 200 OK");
-                            sw.WriteLine("Content-Type: text/plain");
-                            sw.WriteLine();
-                            sw.WriteLine(dictionary[name]);
+                            sw.WriteLine("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nis being tested\r\n");
                             sw.Flush();
                         }
                         else
                         {
-                            sw.WriteLine("HTTP/1.1 404 Not Found");
-                            sw.WriteLine("Content-Type: text/plain");
-                            sw.WriteLine();
+                            sw.WriteLine("HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\n\r\n");
                             sw.Flush();
                         }
                     }
@@ -131,15 +120,13 @@ namespace MyServer
                         do
                         {
                             line = sr.ReadLine();
-                        } while (line.Length != 0);
+                        } while (line.Contains("name=<name>&location=<>"));
 
                         name = split[2];
                         location = split.Last();
                         dictionary[name] = location;
 
-                        sw.WriteLine("HTTP/1.1 200 OK");
-                        sw.WriteLine("Content-Type: text/plain");
-                        sw.WriteLine();
+                        sw.WriteLine("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n");
                         sw.Flush();
                     }
                 }
@@ -168,10 +155,10 @@ namespace MyServer
                         do
                         {
                             line = sr.ReadLine();
-                        } while (line.Length != 0);
+                        } while (line.Length == 1);
 
-                        location = sr.ReadToEnd();
-                        dictionary[name] = location;
+                      //  location = sr.ReadLine();
+                        dictionary[name] = line;
 
                         sw.WriteLine("HTTP/0.9 200 OK\r\nContent-Type: text/plain\r\n\r\n");
                         sw.Flush();

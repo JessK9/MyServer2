@@ -80,12 +80,9 @@ namespace MyServer
                             sw.WriteLine(dictionary[name]);  
                             sw.Flush();
                         }
-                        else
+                        else if(!dictionary.ContainsKey(name))
                         {
-                            sw.WriteLine("HTTP/1.0 404 Not Found");
-                            sw.WriteLine("Content-Type: text/plain");
-                            sw.WriteLine();
-                            sw.WriteLine(dictionary[name]); 
+                            sw.WriteLine("HTTP/1.0 404 Not Found\r\nContent-Type: text/plain\r\n\r\n");
                             sw.Flush();
                         }
                     }
@@ -152,25 +149,22 @@ namespace MyServer
                     if (split[0] == "GET")
                     {
                         name = split[1];
+                       
                         if (dictionary.ContainsKey(name))
                         {
-                            sw.WriteLine("HTTP/0.9 200 OK");
-                            sw.WriteLine("Content-Type: text/plain");
-                            sw.WriteLine();
-                            sw.WriteLine(dictionary[name]);  
+                            sw.WriteLine("HTTP/0.9 200 OK\r\nContent-Type: text/plain\r\n\r\nis being tested");
+                            
                             sw.Flush();
                         }
-                        else
+                        else if(!dictionary.ContainsKey(name))
                         {
-                            sw.WriteLine("HTTP/0.9 404 NOT FOUND");
-                            sw.WriteLine("Content-Type: text/plain" + "\r\n" + dictionary[name]);
-                            
+                            sw.WriteLine("HTTP/0.9 404 Not Found\r\nContent-Type: text/plain\r\n\r\n");
                             sw.Flush();
                         }
                     }
                     else if (split[0] == "PUT")
                     {
-                        name = split[3];
+                        name = split[1];
                         do
                         {
                             line = sr.ReadLine();
@@ -179,9 +173,7 @@ namespace MyServer
                         location = sr.ReadToEnd();
                         dictionary[name] = location;
 
-                        sw.WriteLine("HTTP/0.9 200 OK");
-                        sw.WriteLine("Content-Type: text/plain");
-                        sw.WriteLine();
+                        sw.WriteLine("HTTP/0.9 200 OK\r\nContent-Type: text/plain\r\n\r\n");
                         sw.Flush();
                     }
 

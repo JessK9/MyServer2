@@ -133,9 +133,9 @@ namespace MyServer
 
                 else        // Got to be either whois or 0.9 
                 {
-                    if (split[0] == "GET")
+                    if (split[0] == "GET" && !split[1].StartsWith("/"))
                     {
-                        name = split[1];
+                        name = split[0];
                        
                         if (dictionary.ContainsKey(name))
                         {
@@ -149,8 +149,26 @@ namespace MyServer
                             sw.Flush();
                         }
                     }
+                    else if (split[0] == "GET" && split[1].StartsWith("/"))
+                    {
+                        name = split[1];
+
+                        if (dictionary.ContainsKey(name))
+                        {
+                            sw.WriteLine("HTTP/0.9 200 OK\r\nContent-Type: text/plain\r\n\r\nis being tested");
+
+                            sw.Flush();
+                        }
+                        else if (!dictionary.ContainsKey(name))
+                        {
+                            sw.WriteLine("HTTP/0.9 404 Not Found\r\nContent-Type: text/plain\r\n\r\n");
+                            sw.Flush();
+                        }
+
+                    }
                     else if (split[0] == "PUT")
                     {
+                     
                         name = split[1];
                         do
                         {

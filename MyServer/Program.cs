@@ -33,7 +33,7 @@ namespace MyServer
                 {
                     connection = listener.AcceptSocket();
                     socketStream = new NetworkStream(connection);
-                    socketStream.ReadTimeout = 500;
+                   socketStream.ReadTimeout = 500;
                     handle(socketStream);
                     socketStream.Close();
                     connection.Close();
@@ -98,14 +98,15 @@ namespace MyServer
                     }
 
                 }
-                else if(line.Contains("HTTP/1.1"))
+                else if(line.EndsWith("HTTP/1.1"))
                 {
                     if (split[0] == "GET")
                     {
                         name = split[1].Substring(7);    
                         if (dictionary.ContainsKey(name))
                         {
-                            sw.WriteLine("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nis being tested\r\n");
+                            sw.WriteLine("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nis being tested");
+                            
                             sw.Flush();
                         }
                         else
@@ -133,23 +134,14 @@ namespace MyServer
 
                 else        // Got to be either whois or 0.9 
                 {
-                    if (split[0] == "GET" && !split[1].StartsWith("/"))
+                    if ((split[0] == "GET" || split[0] == "PUT") && split.Length == 1)   // if the name is GET for whois
                     {
                         name = split[0];
+                            sw.WriteLine("is being tested");
+                            sw.Flush();
                        
-                        if (dictionary.ContainsKey(name))
-                        {
-                            sw.WriteLine("HTTP/0.9 200 OK\r\nContent-Type: text/plain\r\n\r\nis being tested");
-                            
-                            sw.Flush();
-                        }
-                        else if(!dictionary.ContainsKey(name))
-                        {
-                            sw.WriteLine("HTTP/0.9 404 Not Found\r\nContent-Type: text/plain\r\n\r\n");
-                            sw.Flush();
-                        }
                     }
-                    else if (split[0] == "GET" && split[1].StartsWith("/"))
+                   else if (split[0] == "GET" && split[1].StartsWith("/"))
                     {
                         name = split[1];
 
@@ -164,9 +156,9 @@ namespace MyServer
                             sw.WriteLine("HTTP/0.9 404 Not Found\r\nContent-Type: text/plain\r\n\r\n");
                             sw.Flush();
                         }
-
                     }
-                    else if (split[0] == "PUT")
+
+                    else if (split[0] == "PUT" && split[1].StartsWith("/"))
                     {
                      
                         name = split[1];
@@ -181,6 +173,7 @@ namespace MyServer
                         sw.WriteLine("HTTP/0.9 200 OK\r\nContent-Type: text/plain\r\n\r\n");
                         sw.Flush();
                     }
+                   
 
                    else if (split.Length == 1)                   // get the person out of the dictionary as there is no location
                     {

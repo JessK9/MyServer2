@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.IO;
 
+
 namespace MyServer
 {
     class Program
@@ -57,7 +58,9 @@ namespace MyServer
                 StreamReader sr = new StreamReader(socketStream);
                 try
                 {
-                    line = sr.ReadLine();
+                   
+                        line = sr.ReadLine();
+                   
                 }
                 catch (Exception e)
                 {
@@ -67,9 +70,9 @@ namespace MyServer
                
                 string[] split = line.Split(' ');
                
-                if (line.Contains("HTTP/1.0"))
+                if (line.EndsWith("HTTP/1.0"))
                 {
-                    if (split[0] == "GET")
+                    if (split[0] == "GET" || (split[0] == "GET" && split[1].StartsWith("/")) )
                     {
                         name = split[1].Substring(2);
                         if (dictionary.ContainsKey(name))
@@ -132,18 +135,26 @@ namespace MyServer
                     }
                 }
 
-                else        // Got to be either whois or 0.9 
-                {
-                    if ((split[0] == "GET" || split[0] == "PUT") && split.Length == 1)   // if the name is GET for whois
+                else         //0.9 or whois
+                {                           // TETS 30
+                    if ((split[0] == "GET" || split[0] == "PUT") && split.Length == 1)   // if the name is GET for whois, so this is for whois
                     {
                         name = split[0];
-                            sw.WriteLine("is being tested");
+                        if (dictionary.ContainsKey(name))
+                        {
+                            sw.WriteLine(dictionary[name]);
                             sw.Flush();
-                       
+                        }
+                        else
+                        {
+                            sw.WriteLine("ERROR: no entries found");
+                            sw.Flush();
+                        }
+
                     }
-                   else if (split[0] == "GET" && split[1].StartsWith("/"))
+                    else if (split[0] == "GET" && split[1].StartsWith("/"))
                     {
-                        name = split[1];
+                        name = split[1].Substring(1);
 
                         if (dictionary.ContainsKey(name))
                         {
@@ -157,25 +168,36 @@ namespace MyServer
                             sw.Flush();
                         }
                     }
+                   
+                    
+                  /*  else if (split[0] == "PUT" && split[1].StartsWith("/"))  // this is for the whois protocol, when the name is PUT and the location starts with a /
+                    {                                                           // this is for further test 29 on lab 4 however cant distuniguish between this and 
+                                                                                // the PUT 0.9 update
 
-                    else if (split[0] == "PUT" && split[1].StartsWith("/"))
+                        name = split[0];
+                        location = string.Join(" ", split.Skip(1).ToArray());
+                        dictionary[name] = location;
+
+                        sw.WriteLine("OK");
+                        sw.Flush();
+                    }*/
+                    else if (split[0] == "PUT" && split[1].StartsWith("/"))  // for the 0.9 if there is a location and it is an update
                     {
-                     
+
                         name = split[1];
                         do
                         {
                             line = sr.ReadLine();
                         } while (line.Length == 1);
 
-                      //  location = sr.ReadLine();
+                        //  location = sr.ReadLine();
                         dictionary[name] = line;
 
                         sw.WriteLine("HTTP/0.9 200 OK\r\nContent-Type: text/plain\r\n\r\n");
                         sw.Flush();
                     }
-                   
-
-                   else if (split.Length == 1)                   // get the person out of the dictionary as there is no location
+                                                                        
+                    else if (split.Length == 1)         //whois          // get the person out of the dictionary as there is no location
                     {
                         name = split[0];
                         if (dictionary.ContainsKey(name))
@@ -190,7 +212,7 @@ namespace MyServer
                         }
                     }
 
-                    else
+                    else 
                     {
                         name = split[0];
                         location = string.Join(" ", split.Skip(1).ToArray());

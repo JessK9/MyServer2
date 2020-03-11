@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Net;
 using System.IO;
+using System.Threading;
 
 
 namespace MyServer
@@ -13,10 +14,11 @@ namespace MyServer
     class Program
     {
         static Dictionary<string, string> dictionary = new Dictionary<string, string>();
+  
 
         static void Main(string[] args)
         {
-            dictionary.Add("jess", "fenner");
+           
             runServer();
 
         }
@@ -136,7 +138,7 @@ namespace MyServer
                 }
 
                 else         //0.9 or whois
-                {                           // TETS 30
+                {                           // TEST 30
                     if ((split[0] == "GET" || split[0] == "PUT") && split.Length == 1)   // if the name is GET for whois, so this is for whois
                     {
                         name = split[0];
@@ -152,9 +154,9 @@ namespace MyServer
                         }
 
                     }
-                    else if (split[0] == "GET" && split[1].StartsWith("/"))
+                    else if (split[0] == "GET" && split[1].StartsWith("/"))     // server update check for 0.9
                     {
-                        name = split[1].Substring(1);
+                        name = split[1];
 
                         if (dictionary.ContainsKey(name))
                         {

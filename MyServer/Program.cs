@@ -156,7 +156,7 @@ namespace MyServer
                     }
                     else if (split[0] == "GET" && split[1].StartsWith("/"))     // server update check for 0.9
                     {
-                        name = split[1];
+                        name = split[1].Substring(1);
 
                         if (dictionary.ContainsKey(name))
                         {
@@ -186,7 +186,7 @@ namespace MyServer
                     else if (split[0] == "PUT" && split[1].StartsWith("/"))  // for the 0.9 if there is a location and it is an update
                     {
 
-                        name = split[1];
+                        name = split[1].Substring(1);
                         do
                         {
                             line = sr.ReadLine();

@@ -63,8 +63,8 @@ namespace MyServer
                 NetworkStream socketStream;
                 socketStream = new NetworkStream(connection);
                 Console.WriteLine("Connection Recieved");
-                //socketStream.ReadTimeout = 500;
-
+               //socketStream.ReadTimeout = 500;
+            
                 try
                 {
                     
@@ -106,11 +106,9 @@ namespace MyServer
                         else if (split[0] == "POST")
                         {
                             name = split[1].Substring(1);
-                            do
-                            {
-                                line = sr.ReadLine();
-                            } while (line.Length != 0);         // want the very last line, atm is producing the optional header lines
-
+                            
+                                
+                            
                             dictionary[name] = line;
 
                             sw.WriteLine("HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\n\r\n");
@@ -137,14 +135,18 @@ namespace MyServer
                         }
                         else if (split[0] == "POST")
                         {
-
-                            do
+                           
+                            for ( int i= 0; i < split.Length; i ++)
                             {
-                                line = sr.ReadLine();
-                            } while (line.Contains("name=<name>&location=<>"));
-
-                            name = split[2];
-                            location = split.Last();
+                               
+                                    line = sr.ReadLine();
+                                
+                                
+                            }
+                           
+                            string[] split1 = line.Split('=', '&');
+                            location = split1.Last();
+                            name = split1[1];
                             dictionary[name] = location;
 
                             sw.WriteLine("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n");

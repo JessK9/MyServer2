@@ -63,7 +63,7 @@ namespace MyServer
                 NetworkStream socketStream;
                 socketStream = new NetworkStream(connection);
                 Console.WriteLine("Connection Recieved");
-               //socketStream.ReadTimeout = 500;
+                                                                                                 socketStream.ReadTimeout = 500;
             
                 try
                 {
@@ -135,15 +135,29 @@ namespace MyServer
                         }
                         else if (split[0] == "POST")
                         {
-                           
-                            for ( int i= 0; i < split.Length; i ++)
+
+                            string line2 = sr.ReadLine();
+                            string line3 = sr.ReadLine();
+                            
+                            do
                             {
-                               
-                                    line = sr.ReadLine();
-                                
-                                
-                            }
-                           
+                                line = sr.ReadLine();
+                            } while (line.Length == 0);
+                            
+
+                            /*for ( int i= 0; i < split.Length; i ++)
+                             {
+
+                                   
+                                 if (line.Length == 0)
+                                 {
+                                     continue;
+                                 }
+
+                             }*/
+
+
+
                             string[] split1 = line.Split('=', '&');
                             location = split1.Last();
                             name = split1[1];

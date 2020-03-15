@@ -199,7 +199,17 @@ namespace MyServer
                         else if (split[0] == "PUT" && split[1].StartsWith("/"))  // if the protocol is 0.9 and it is an update
                                                                                   // however hits this if its a whois where the name is PUT and location starts with a /
                         {
-                            
+                            putName = split[0];
+                            if (dictionary.ContainsKey(putName))                    // this is for whois protocol, if the name is PUT and location starts with a /
+                            {
+                                location = string.Join(" ", split.Skip(1).ToArray());
+                                dictionary[putName] = location;
+
+                                sw.WriteLine("OK");
+                                sw.Flush();
+                            }
+                            else if (!dictionary.ContainsKey(putName))
+                            {
                                 name = split[1].Substring(1);
                                 do
                                 {
@@ -210,7 +220,7 @@ namespace MyServer
 
                                 sw.WriteLine("HTTP/0.9 200 OK\r\nContent-Type: text/plain\r\n\r\n");
                                 sw.Flush();
-                            
+                            }
                         }
 
                         else if (split.Length == 1)         //whois          

@@ -7,7 +7,10 @@ using System.Net.Sockets;
 using System.Net;
 using System.IO;
 using System.Threading;
-
+/* 
+ * To do:
+ * - Lab4 server - test 9 bung rested?
+ */
 
 namespace MyServer
 {
@@ -15,13 +18,10 @@ namespace MyServer
     {
         static Dictionary<string, string> dictionary = new Dictionary<string, string>();
         
-        
-
         static void Main(string[] args)
         {
-           
+           // dictionary.Add("PUT", "fenner");
             runServer();
-
         }
         
         static void runServer()
@@ -59,11 +59,12 @@ namespace MyServer
                 string line;
                 string name;
                 string location;
+                string putName;
 
                 NetworkStream socketStream;
                 socketStream = new NetworkStream(connection);
                 Console.WriteLine("Connection Recieved");
-                                                                                                 socketStream.ReadTimeout = 500;
+                                                                                           //   socketStream.ReadTimeout = 500;
             
                 try
                 {
@@ -94,7 +95,7 @@ namespace MyServer
                             name = split[1].Substring(2);
                             if (dictionary.ContainsKey(name))
                             {
-                                sw.WriteLine("HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\n\r\nis being tested\r\n");
+                                sw.WriteLine("HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\n\r\n" + dictionary[name] + "\r\n");
                                 sw.Flush();
                             }
                             else if (!dictionary.ContainsKey(name))
@@ -106,9 +107,14 @@ namespace MyServer
                         else if (split[0] == "POST")
                         {
                             name = split[1].Substring(1);
+                            string line2 = sr.ReadLine();
                             
-                                
-                            
+                            do
+                            {
+                                line = sr.ReadLine();
+                            } while (line.Length == 0);         
+
+                           
                             dictionary[name] = line;
 
                             sw.WriteLine("HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\n\r\n");
@@ -123,7 +129,7 @@ namespace MyServer
                             name = split[1].Substring(7);
                             if (dictionary.ContainsKey(name))
                             {
-                                sw.WriteLine("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nis being tested");
+                                sw.WriteLine("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n" + dictionary[name]);
 
                                 sw.Flush();
                             }
@@ -144,20 +150,6 @@ namespace MyServer
                                 line = sr.ReadLine();
                             } while (line.Length == 0);
                             
-
-                            /*for ( int i= 0; i < split.Length; i ++)
-                             {
-
-                                   
-                                 if (line.Length == 0)
-                                 {
-                                     continue;
-                                 }
-
-                             }*/
-
-
-
                             string[] split1 = line.Split('=', '&');
                             location = split1.Last();
                             name = split1[1];
@@ -192,8 +184,7 @@ namespace MyServer
 
                             if (dictionary.ContainsKey(name))
                             {
-                                sw.WriteLine("HTTP/0.9 200 OK\r\nContent-Type: text/plain\r\n\r\nis being tested");
-
+                                sw.WriteLine("HTTP/0.9 200 OK\r\nContent-Type: text/plain\r\n\r\n" + dictionary[name]);
                                 sw.Flush();
                             }
                             else if (!dictionary.ContainsKey(name))
@@ -203,20 +194,23 @@ namespace MyServer
                             }
                         }
 
+                        
 
                         else if (split[0] == "PUT" && split[1].StartsWith("/"))  // if the protocol is 0.9 and it is an update
                                                                                   // however hits this if its a whois where the name is PUT and location starts with a /
                         {
-                            name = split[1].Substring(1);
-                            do
-                            {
-                                line = sr.ReadLine();
-                            } while (line.Length == 1);
                             
-                            dictionary[name] = line;
+                                name = split[1].Substring(1);
+                                do
+                                {
+                                    line = sr.ReadLine();
+                                } while (line.Length == 0);
 
-                            sw.WriteLine("HTTP/0.9 200 OK\r\nContent-Type: text/plain\r\n\r\n");
-                            sw.Flush();
+                                dictionary[name] = line;
+
+                                sw.WriteLine("HTTP/0.9 200 OK\r\nContent-Type: text/plain\r\n\r\n");
+                                sw.Flush();
+                            
                         }
 
                         else if (split.Length == 1)         //whois          

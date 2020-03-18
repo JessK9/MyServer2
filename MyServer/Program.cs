@@ -23,8 +23,6 @@ namespace MyServer
 
         static void Main(string[] args)
         {
-            dictionary.Add("jess", "fenner");
-            
             
             for (int i = 0; i < args.Length; i++)
             {
@@ -47,10 +45,10 @@ namespace MyServer
                             {
                                 timeoutServer = int.Parse(args[++h]);
                                 Console.WriteLine("Timeout for the server has been changed to: " + timeoutServer);
-
                             }
                             
                         }
+
                         Application.EnableVisualStyles();
                         Application.SetCompatibleTextRenderingDefault(false);
                         Application.Run(new Form1());
@@ -80,8 +78,8 @@ namespace MyServer
                 while (true)
                 {
                     connection = listener.AcceptSocket();
-                    connection.SendTimeout = 1000/*Program.timeoutServer*/;
-                    connection.ReceiveTimeout = 1000/*Program.timeoutServer*/;
+                    connection.SendTimeout = timeoutServer;
+                    connection.ReceiveTimeout = timeoutServer;
                     RequestHandler = new Handler();
                     Thread t = new Thread(() => RequestHandler.doRequest(connection, Log));
                     t.Start();
@@ -279,6 +277,10 @@ namespace MyServer
                         else if (split.Length == 1)         //this is lookup for the whois protocol    
                         {
                             name = split[0];
+                            if (debug == true)
+                            {
+                                Console.WriteLine("This is look-up for protocol whois and the username is: " + name);
+                            }
                             if (dictionary.ContainsKey(name))
                             {
                                 sw.WriteLine(dictionary[name]);

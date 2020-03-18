@@ -27,6 +27,10 @@ namespace MyServer
         private void button1_Click(object sender, EventArgs e)
         {
             Program.filename = filenameTB.Text;
+            if (timeoutTB.Text == null)
+            {
+                Program.timeoutServer = 1000;
+            }
             int i;
             if (!int.TryParse(timeoutTB.Text, out i))
             {
@@ -41,10 +45,7 @@ namespace MyServer
             }
         }
 
-        private void button2_Click(object sender, EventArgs e)          // debug button
-        {
-            Program.debug = true;
-        }
+        
 
         private void timeoutTB_TextChanged(object sender, EventArgs e)
         {

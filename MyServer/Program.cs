@@ -7,10 +7,8 @@ using System.Net.Sockets;
 using System.Net;
 using System.IO;
 using System.Threading;
-/* 
- * To do:
- * - Lab4 server - test 9 bung rested?
- */
+using System.Windows.Forms;
+
 
 namespace MyServer
 {
@@ -18,14 +16,17 @@ namespace MyServer
     {
         static Dictionary<string, string> dictionary = new Dictionary<string, string>();
         public static Logging Log;
-        public static int timeoutServer = 500;
+        public static int timeoutServer = 1000;
+        public static bool debug;
+        public static string filename = null;
+        
 
         static void Main(string[] args)
         {
             dictionary.Add("jess", "fenner");
-            String filename = null;
-            int timeoutServer = 500;
-            for (int i = 0; i < args.Length; i ++)
+            
+            
+            for (int i = 0; i < args.Length; i++)
             {
                 switch (args[i])
                 {
@@ -36,6 +37,25 @@ namespace MyServer
                         timeoutServer = int.Parse(args[++i]);
                         Console.WriteLine("Timeout for the server has been changed to: " + timeoutServer);
                         break;
+                    case "-d":
+                        debug = true;
+                        break;
+                    case "-w":
+                       for(int h = 0; h < args.Length; h++)
+                        {
+                            if (args[h] == "-t")
+                            {
+                                timeoutServer = int.Parse(args[++h]);
+                                Console.WriteLine("Timeout for the server has been changed to: " + timeoutServer);
+
+                            }
+                            
+                        }
+                        Application.EnableVisualStyles();
+                        Application.SetCompatibleTextRenderingDefault(false);
+                        Application.Run(new Form1());
+                        break;
+
                     default:
                         Console.WriteLine("Unknown Option: " + args[i]);
                         break;
@@ -60,8 +80,10 @@ namespace MyServer
                 while (true)
                 {
                     connection = listener.AcceptSocket();
+                    connection.SendTimeout = 1000/*Program.timeoutServer*/;
+                    connection.ReceiveTimeout = 1000/*Program.timeoutServer*/;
                     RequestHandler = new Handler();
-                    Thread t = new Thread(() => RequestHandler.doRequest(connection));
+                    Thread t = new Thread(() => RequestHandler.doRequest(connection, Log));
                     t.Start();
 
                 }
@@ -75,7 +97,7 @@ namespace MyServer
         class Handler
         {
 
-            public void doRequest(Socket connection)
+            public void doRequest(Socket connection, Logging Log)
             {
                 string line = null;
                 string name;
@@ -89,13 +111,6 @@ namespace MyServer
                 
                 String Status = "OK";
                 
-                socketStream.ReadTimeout = Program.timeoutServer;
-                if (debug == true)  // do debug!
-                {
-                    Console.WriteLine("This is look-up for protocol whois and the username is: " + username + " and the location is: " + location);
-                }
-
-
                 try
                 {
 
@@ -111,7 +126,7 @@ namespace MyServer
 
                     if (line.EndsWith("HTTP/1.0"))
                     {
-                        if (split[0] == "GET" || (split[0] == "GET" && split[1].StartsWith("/")))
+                        if (split[0] == "GET" || (split[0] == "GET" && split[1].StartsWith("/")))               //this is the lookup for the HTTP/1.0 protocol  
                         {
                             name = split[1].Substring(2);
                             if (dictionary.ContainsKey(name))
@@ -120,6 +135,12 @@ namespace MyServer
                                 sw.Flush();
                                 lineMerge = "GET " + name + " is " + dictionary[name];
                                 Status = "OK";
+                                if (debug == true)  
+                                {
+                                    Console.WriteLine("This is look-up for protocol HTTP/1.0 and the username is: " + name + " and the location is: " + dictionary[name]);
+                                }
+
+                                
                             }
                             else if (!dictionary.ContainsKey(name))
                             {
@@ -128,7 +149,7 @@ namespace MyServer
                                 Status = "UNKNOWN";
                             }
                         }
-                        else if (split[0] == "POST")
+                        else if (split[0] == "POST")                    //this is the update for the HTTP/1.0 protocol  
                         {
                             name = split[1].Substring(1);
                             string line2 = sr.ReadLine();
@@ -145,12 +166,16 @@ namespace MyServer
                             sw.Flush();
                             lineMerge = "POST " + name + " location changed to be " + line1;
                             Status = "OK";
+                            if (debug == true)
+                            {
+                                Console.WriteLine("This is an update location for protocol HTTP/1.0 and the username is: " + name + " and the location is: " + line1);
+                            }
                         }
 
                     }
                     else if (line.EndsWith("HTTP/1.1"))
                     {
-                        if (split[0] == "GET")
+                        if (split[0] == "GET")                   //this is lookup for the HTTP/1.1 protocol    
                         {
                             name = split[1].Substring(7);
                             if (dictionary.ContainsKey(name))
@@ -167,7 +192,7 @@ namespace MyServer
                                 Status = "UNKNOWN";
                             }
                         }
-                        else if (split[0] == "POST")
+                        else if (split[0] == "POST")             //this is the update for the HTTP/1.1 protocol    
                         {
 
                             string line2 = sr.ReadLine();
@@ -190,10 +215,10 @@ namespace MyServer
                         }
                     }
 
-                    else         //0.9 or whois
+                    else         //The following are for either HTTP/0.9 or whois
                     {
 
-                        if ((split[0] == "GET" || split[0] == "PUT") && split.Length == 1)   // if the name is GET for whois, so this is for whois
+                        if ((split[0] == "GET" || split[0] == "PUT") && split.Length == 1)   // if the name is GET or PUT for protocol whois
                         {
                             name = split[0];
                             if (dictionary.ContainsKey(name))
@@ -211,7 +236,7 @@ namespace MyServer
                             }
 
                         }
-                        else if (split[0] == "GET" && split[1].StartsWith("/"))     // server query for the name for 0.9
+                        else if (split[0] == "GET" && split[1].StartsWith("/"))     // this is lookup for the HTTP/0.9 protocol    
                         {
                             name = split[1].Substring(1);
 
@@ -232,7 +257,7 @@ namespace MyServer
 
 
 
-                        else if (split[0] == "PUT" && split[1].StartsWith("/"))  // if the protocol is 0.9 and it is an update
+                        else if (split[0] == "PUT" && split[1].StartsWith("/"))  //  //this is for the update for the HTTP/0.9 protocol    
                                                                                  // however hits this if its a whois where the name is PUT and location starts with a /
                         {
                             name = split[1].Substring(1);
@@ -251,7 +276,7 @@ namespace MyServer
 
                         }
 
-                        else if (split.Length == 1)         //whois   search        
+                        else if (split.Length == 1)         //this is lookup for the whois protocol    
                         {
                             name = split[0];
                             if (dictionary.ContainsKey(name))
@@ -300,8 +325,12 @@ namespace MyServer
         }
     }
 }
+/// <summary>
+/// The below Logging code is taken from Brian Tompsett's logging example from youtube: Client and Server Networking in C# - Step 7
+/// https://www.youtube.com/watch?v=_oEVZSE1x64&list=PL3czsVugafjPqF4dO2vQY8EPRp3mfd_4u&index=10 
+/// </summary>
 
-    public class Logging
+public class Logging
     {
         public static String LogFile = null;
 
